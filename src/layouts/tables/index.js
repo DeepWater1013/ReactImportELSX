@@ -38,12 +38,21 @@ import getExcelData from "layouts/tables/data/loadsListData";
 
 import {
   useMaterialUIController,
+  setExcelData,
+  setExcelRows
 } from "context";
 
 function Tables() {
- 
+  const [controller, dispatch] = useMaterialUIController();
+  const {
+    transparentSidenav,
+    whiteSidenav,
+    darkMode,
+    excelData
+  } = controller;
   const [file, setFile] = useState(null);
-  const [originSheetData, setOriginSheetData] = useState(null);
+  const [originSheetData, setOriginSheetData] = useState(excelData);
+  
   // const {excelHeader, setExcelHeader} = useState([]);
   useEffect(() => {
     if (file) {
@@ -58,12 +67,13 @@ function Tables() {
           resp.rows.pop();
 
           const { columns, rows} = getExcelData(resp.rows.slice(1, resp.rows.length));
-          console.log("------------", columns, rows);
+          setExcelRows(dispatch, resp.rows.slice(1, resp.rows.length));
+          setExcelData(dispatch, {columns, rows})
+
           setOriginSheetData({
             columns,
             rows
-          })
-          
+          })          
         }
       });
     }
@@ -74,12 +84,8 @@ function Tables() {
 
 
 
-  const [controller] = useMaterialUIController();
-  const {
-    transparentSidenav,
-    whiteSidenav,
-    darkMode,
-  } = controller;
+
+
 
   const [disabled, setDisabled] = useState(false);
 
@@ -98,6 +104,7 @@ function Tables() {
 
     // Remove event listener on cleanup
     return () => window.removeEventListener("resize", handleDisabled);
+
   }, []);
 
   // sidenav type buttons styles
@@ -182,20 +189,19 @@ function Tables() {
                 </MDTypography>
               </MDBox>
               <MDBox pt={3}>
-              {
-                originSheetData
-                ?
-                <DataTable
-                  table={originSheetData}
-                  isSorted={false}
-                  entriesPerPage={false}
-                  showTotalEntries={false}
-                  noEndBorder
-                />
-                :
-                false
-
-              }
+                {
+                  originSheetData
+                  ? 
+                  <DataTable
+                    table={originSheetData}
+                    isSorted={false}
+                    entriesPerPage={false}
+                    showTotalEntries={false}
+                    noEndBorder
+                  />
+                  :
+                  false
+                }
               </MDBox>
             </Card>
           </Grid>
